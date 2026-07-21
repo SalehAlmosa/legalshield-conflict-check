@@ -1,6 +1,6 @@
 # Improving the Client Experience: Automated Conflict-of-Interest Check at Intake
 
-A self-directed analytics case study (Google Data Analytics Case Study 3) grounded in real experience doing member intake at a LegalShield provider law firm — where every new matter required a **manual** conflict-of-interest check against existing clients before the case could move forward.
+A self-directed analytics case study grounded in real experience doing member intake at a LegalShield provider law firm — where every new matter required a **manual** conflict-of-interest check against existing clients before the case could move forward.
 
 **Business task:** Members calling in for legal help had to wait while staff manually checked whether the opposing party conflicted with an existing client. This project quantifies the cost of that manual process and designs a data-driven fix that improves the client experience.
 
