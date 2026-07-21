@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intake Conflict-Check Improvement</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#fcfcfb;color:#0b0b0b;padding:32px;max-width:980px;margin:0 auto;}
+  h1{font-size:22px;font-weight:600;margin:0;}
+  .sub{color:#898781;font-size:13px;margin:4px 0 24px;}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:28px;}
+  .kpi{background:#f1efe8;border-radius:10px;padding:16px;}
+  .kpi .l{font-size:13px;color:#898781;}
+  .kpi .v{font-size:22px;font-weight:600;margin-top:2px;}
+  .kpi.good{background:#e1f5ee;} .kpi.good .v{color:#0f6e56;}
+  .kpi.flag{background:#faece7;} .kpi.flag .v{color:#993c1d;}
+  h2{font-size:15px;font-weight:600;margin:24px 0 8px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .chartbox{position:relative;height:260px;background:#fff;border:1px solid #e1e0d9;border-radius:10px;padding:16px;}
+  .note{font-size:12px;color:#898781;margin-top:24px;line-height:1.6;}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<h1>Intake conflict-of-interest check: manual vs automated</h1>
+<div class="sub">Simulated LegalShield-style intake: 2,000 intakes · 247 true conflicts · 800 known parties · source: legal_intake (BigQuery)</div>
+
+<div class="kpis">
+  <div class="kpi flag"><div class="l">Avg manual wait</div><div class="v">14.8 hrs</div></div>
+  <div class="kpi flag"><div class="l">Manual catch rate</div><div class="v">51%</div></div>
+  <div class="kpi good"><div class="l">Automated catch rate</div><div class="v">99%</div></div>
+  <div class="kpi good"><div class="l">Cleared instantly</div><div class="v">83%</div></div>
+  <div class="kpi"><div class="l">Need human review</div><div class="v">17%</div></div>
+</div>
+
+<div class="grid2">
+  <div>
+    <h2>Conflicts caught: 247 true conflicts</h2>
+    <div class="chartbox"><canvas id="catchChart"></canvas></div>
+  </div>
+  <div>
+    <h2>Where every intake lands (automated)</h2>
+    <div class="chartbox"><canvas id="routeChart"></canvas></div>
+  </div>
+</div>
+
+<h2>Member wait for conflict clearance</h2>
+<div class="chartbox" style="height:150px;"><canvas id="waitChart"></canvas></div>
+
+<div class="note">
+The problem: manual checks average 14.8 hours (15% take over a day) and catch only 51% of true conflicts — name variations (Bob vs Robert, "ABC Corp" vs "ABC Corporation", punctuation/casing) slip past an eyeball review. That's both a member-experience delay and a compliance risk.
+The fix: a normalized-matching conflict check at the moment of intake catches 99% of conflicts, clears 83% of members instantly, and routes only 17% to a human — of which ~5% of all intakes are namesake false positives that a secondary identifier (DOB or matter) resolves. Simulated data; reproducible in BigQuery.
+</div>
+
+<script>
+new Chart(document.getElementById('catchChart'),{type:'bar',data:{labels:['Manual (exact eyeball)','Automated (normalized)'],datasets:[{label:'Caught',data:[125,244],backgroundColor:'#0f6e56'},{label:'Missed',data:[122,3],backgroundColor:'#d85a30'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true}}}});
+new Chart(document.getElementById('routeChart'),{type:'doughnut',data:{labels:['Cleared instantly (1,658)','True conflict flagged (244)','Namesake to verify (98)'],datasets:[{data:[1658,244,98],backgroundColor:['#1baf7a','#d85a30','#eda100']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11}}}}}});
+new Chart(document.getElementById('waitChart'),{type:'bar',data:{labels:['Manual (today)','Automated'],datasets:[{data:[14.8,0.1],backgroundColor:['#d85a30','#0f6e56']}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.x+' hrs avg'}}},scales:{x:{title:{display:true,text:'hours'}},y:{grid:{display:false}}}}});
+</script>
+</body>
+</html>
